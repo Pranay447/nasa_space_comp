@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Link } from 'react-router-dom'
+import { PageLink } from '@/components/PageLink'
 import { ArrowUpRight, Database, Globe, LayoutPanelLeft, Pause, Play } from 'lucide-react'
 import { RegionalTables } from '@/components/atlas/RegionalTables'
 import { SiteMasthead } from '@/components/SiteMasthead'
@@ -61,18 +61,18 @@ export function HomePage({ onSignup, onSources }: { onSignup: () => void; onSour
           data-active={item.id === scene.id} style={{ objectPosition: item.focus }} />)}
       </div>
       <SiteMasthead atlasHref={investigation} onSources={onSources} onSignup={onSignup} />
-      <div className="editorial-stage">
+      <div className="editorial-stage" data-page-motion>
         <div className="editorial-intro">
           <h1>See how Earth is changing.</h1>
           <p>Compare regional climate trends and explore decades of NASA observations.</p>
-          <Link to={investigation} className="editorial-cta">Open the atlas <ArrowUpRight size={16} aria-hidden="true" /></Link>
+          <PageLink to={investigation} className="editorial-cta">Open the atlas <ArrowUpRight size={16} aria-hidden="true" /></PageLink>
         </div>
         <section className="editorial-demo" aria-label="Interactive Atlas preview">
           <header className="editorial-demo-bar"><LayoutPanelLeft size={15} aria-hidden="true" /> <span>Trend Atlas</span></header>
           <div className="editorial-demo-workspace">
             <nav className="editorial-demo-nav" aria-label="Preview navigation">
               <span aria-current="page"><LayoutPanelLeft /> Overview</span>
-              <Link to={investigation}><Globe /> Open atlas</Link>
+              <PageLink to={investigation}><Globe /> Open atlas</PageLink>
               <button type="button" onClick={onSources}><Database /> Sources</button>
               {!reduced && <button type="button" onClick={() => setAuto((running) => !running)}>{auto ? <Pause /> : <Play />}{auto ? 'Pause rotation' : 'Rotate regions'}</button>}
             </nav>
