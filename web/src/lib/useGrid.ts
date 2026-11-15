@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react'
-import { fetchAnnualFrames, fetchTrendField } from './api'
+import { canUseSnapshot, fetchAnnualFrames, fetchTrendField } from './api'
 
 export interface GridData {
   start: number
@@ -27,13 +27,29 @@ export function useGrid(start: number, end: number, enabled: boolean): GridState
     }
     const ac = new AbortController()
     setState((s) => ({ status: 'loading', data: s.data, error: null }))
-    Promise.all([
-      fetchAnnualFrames(start, end, ac.signal),
-      end - start + 1 >= 3 ? fetchTrendField(start, end, ac.signal) : Promise.resolve(null),
-    ])
-      .then(([frames, trend]) => setState({ status: 'ready', data: { start, end, frames, trend }, error: null }))
+    const fromSnapshot = async () => {
+      const { mapSnapshot } = await import('./snapshot')
+      return mapSnapshot(start, end, ac.signal)
+    }
+    const load = async () => {
+      if (end - start + 1 > 80) return fromSnapshot()
+      try {
+        const [frames, trend] = await Promise.all([
+          fetchAnnualFrames(start, end, ac.signal),
+          end - start + 1 >= 3 ? fetchTrendField(start, end, ac.signal) : Promise.resolve(null),
+        ])
+        return { start, end, frames, trend }
+      } catch (error) {
+        if (ac.signal.aborted || !canUseSnapshot(error)) throw error
+        return fromSnapshot()
+      }
+    }
+    load()
+      .then((data) => {
+        if (!ac.signal.aborted) setState({ status: 'ready', data, error: null })
+      })
       .catch((e: Error) => {
-        if (e.name !== 'AbortError') setState({ status: 'error', data: null, error: e.message })
+        if (!ac.signal.aborted) setState({ status: 'error', data: null, error: e.message })
       })
     return () => ac.abort()
   }, [start, end, enabled, attempt])

@@ -1,5 +1,5 @@
 import { create } from 'zustand'
-import { fetchAnalysis, fetchDatasets, queryKey } from './api'
+import { canUseSnapshot, fetchAnalysis, fetchDatasets, queryKey } from './api'
 import type { AnalysisQuery } from './api'
 import type { AnalysisResponse, Dataset, Layer, Mode, Projection } from './types'
 
@@ -76,20 +76,21 @@ async function run(set: (p: Partial<AtlasState>) => void, get: () => AtlasState)
   try {
     const data = await fetchAnalysis(q, request.signal)
     if (request.signal.aborted) return
-    set({ analysis: { status: 'ready', key, data, error: null, offline: false } })
+    set({ analysis: { status: 'ready', key, data: { ...data, queryKey: key }, error: null, offline: false } })
   } catch (e) {
     if (request.signal.aborted) return
-    // Offline fallback: the bundled, precomputed default investigations.
-    try {
-      const r = await fetch('/data/fallback.json', { signal: request.signal })
-      const bundle = (await r.json()) as Record<string, AnalysisResponse>
-      if (!request.signal.aborted && bundle[key]) {
-        set({ analysis: { status: 'ready', key, data: bundle[key], error: null, offline: true } })
+    let error = e
+    if (canUseSnapshot(e)) {
+      try {
+        const { analysisSnapshot } = await import('./snapshot')
+        const data = await analysisSnapshot(q, request.signal)
+        if (request.signal.aborted) return
+        set({ analysis: { status: 'ready', key, data, error: null, offline: true } })
         return
-      }
-    } catch { /* fall through to the error state */ }
+      } catch (fallbackError) { error = fallbackError }
+    }
     if (request.signal.aborted) return
-    set({ analysis: { status: 'error', key, data: null, error: (e as Error).message, offline: false } })
+    set({ analysis: { status: 'error', key, data: null, error: (error as Error).message, offline: false } })
   }
 }
 

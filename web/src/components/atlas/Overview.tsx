@@ -69,7 +69,7 @@ export function AtlasOverview({ dataset, data, regionLabel, onAnalyze }: { datas
           <a href={summary.source.url} target="_blank" rel="noreferrer">{summary.source.name}</a>
           <button type="button" className="ta-btn accent-action" onClick={onAnalyze}>View analysis <ArrowUpRight size={14} aria-hidden="true" /></button>
         </div>
-        {offline && <p className="ta-micro">Showing the saved result.</p>}
+        {offline && <p className="ta-micro">Calculated from the bundled NASA data.</p>}
       </div>}
     </section>
   )

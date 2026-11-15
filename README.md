@@ -34,7 +34,7 @@ python -m venv .venv
 .venv/Scripts/python -m pip install numpy scipy pandas xarray netCDF4 statsmodels fastapi "uvicorn[standard]" pytest httpx
 
 .venv/Scripts/python scripts/build_data.py     # downloads the grid if absent; writes data/build/gistemp_cube.npz and data/manifest.json
-.venv/Scripts/python scripts/build_static.py   # writes web/public/data/{hero,fallback,datasets}.json
+.venv/Scripts/python scripts/build_static.py   # regenerates bundled browser data from the pinned NASA sources
 
 npm --prefix web install
 npm --prefix web run build
@@ -43,6 +43,8 @@ npm --prefix web run build
 ```
 
 Then open http://127.0.0.1:8000. The API serves the built app (`web/dist`) from the same origin.
+
+For a static deployment, run `npm --prefix web run build` and publish the full contents of `web/dist`, including `data/snapshot`. Configure SPA navigation so `/atlas` serves `index.html`. If the Python API is absent, the browser uses the bundled NASA files for custom regions, paired trends, map layers and evidence exports. The bundled grid loads by decade from the same origin.
 
 For development, run `npm --prefix web run dev` as well and open http://localhost:5173, which proxies `/api` to port 8000. Both servers are also defined in `.claude/launch.json` (`api` and `web`).
 
@@ -81,7 +83,7 @@ The same analysis is available as CSV from the running API:
 | Band trend, interval, series (`gistemp-zonal`) | GISS GISTEMP v4 zonal annual means, `ZonAnn.Ts+dSST.txt`, saved as `NASA_GISTEMP_ZONAL_SNAPSHOT.txt` (SHA-256 `e489c207…525b`; table inputs through 10/2026; rows 1880–2025; hundredths of °C; baseline 1951–1980) | Parsed (`api/trend_atlas/zonal.py`), divided by 100, OLS + HAC fit (`inference.py`) |
 | Map frames, trend layer, custom boxes | GISS `gistemp1200_GHCNv4_ERSSTv5.nc.gz` (SHA-256 `f7788db9…2a3c7`; 1762 months, 1880-01 to 2026-10; 90×180 cells at 2°; int16, scale_factor 0.01, _FillValue 32767; stored unit K anomaly, numerically equal to °C anomaly; 10.8% of cell-months missing) | Cached as `data/build/gistemp_cube.npz`. Day-weighted annual means and area-weighted box averages with fixed footprint and coverage reporting (`grid.py`) |
 | Rainfall chart, rate and paired test | NASA Giovanni area-averaged export of GPM IMERG Final Monthly V07, doi:10.5067/GPM/IMERG/3B-MONTH/07 | mm/hr x hours in month, summed over complete years (see below) |
-| Homepage and offline fallback | Outputs of the above | `scripts/build_static.py` → `web/public/data/*.json` |
+| Homepage and static analysis | Outputs of the above | `scripts/build_static.py` → `web/public/data/` |
 | Homepage photos | NASA Earth Observatory pages (see THIRD_PARTY_NOTICES.md) | Local `.webp` copies in `web/public/scenes/` |
 | Coastlines | Natural Earth via `world-atlas` | TopoJSON → GeoJSON |
 
@@ -98,7 +100,7 @@ The same analysis is available as CSV from the running API:
 ## Architecture
 
 - `api/`: FastAPI app (`main.py`) with `/api/health`, `/api/datasets`, `/api/analysis`, `/api/analysis.csv`, `/api/grid/annual` and `/api/grid/trend`. It also serves `web/dist` when that exists. The logic is in `api/trend_atlas/` (`zonal`, `grid`, `inference`, `precip`, `service`), and the pytest suite is in `api/tests/`.
-- `scripts/`: `build_data.py` (fetch, verify, cache) and `build_static.py` (static JSON for the homepage and offline fallback).
+- `scripts/`: `build_data.py` (fetch, verify, cache) and `build_static.py` (homepage data and browser analysis snapshot).
 - `web/`: React + Vite + TypeScript app (MapLibre GL, ECharts, zustand).
 - `data/`: `manifest.json` (committed), plus `raw/` and `build/` (gitignored). `giovanni/` holds the rainfall CSVs once they are exported.
 

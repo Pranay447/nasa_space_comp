@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react'
 import type { ReactNode } from 'react'
 import { ArrowDown, ChevronDown, Clipboard, Download } from 'lucide-react'
 import { csvUrl } from '@/lib/api'
+import { downloadSnapshotCsv } from '@/lib/snapshotCsv'
 import { OBSERVED_SCALE, uniformColors } from '@/lib/colors'
 import { EVIDENCE_HELP, EVIDENCE_LABEL, interval, pValue, signed, value } from '@/lib/format'
 import { boundsText } from '@/lib/geo'
@@ -94,7 +95,7 @@ export function EvidenceDock({ dataset, data }: { dataset: Dataset; data: Analys
             </span>
           </p>
         )}
-        {offline && <p className="ta-micro mt-1">Showing the bundled, precomputed result because the analysis service is unreachable.</p>}
+        {offline && <p className="ta-micro mt-1">Calculated from the bundled NASA data.</p>}
       </div>
 
       <div className="min-w-0 lg:border-l lg:border-line lg:pl-4">
@@ -178,6 +179,7 @@ function coverageText(r: RegionResult): string {
 
 /** Analyze view: inference details, monthly surface, accessible table, export and provenance. */
 export function AnalyzePanel({ dataset, data, charts }: { dataset: Dataset; data: AnalysisResponse; charts: ReactNode }) {
+  const offline = useAtlas((s) => s.analysis.offline)
   const frameYear = useAtlas((s) => s.frameYear)
   const setFrameYear = useAtlas((s) => s.setFrameYear)
   const theme = useAtlas((s) => s.theme)
@@ -248,7 +250,9 @@ export function AnalyzePanel({ dataset, data, charts }: { dataset: Dataset; data
         <div><p>{data.dataset.productVersion}</p><a href={data.dataset.source.url} target="_blank" rel="noreferrer">Open dataset</a></div>
         <div className="analysis-actions">
           <button className="ta-btn" type="button" onClick={copyFinding}><Clipboard size={15} aria-hidden="true" /> Copy finding</button>
-          <a className="ta-btn accent-action no-underline" href={csvUrl(currentQuery())} download><Download size={15} aria-hidden="true" /> Download evidence CSV</a>
+          {offline
+            ? <button type="button" className="ta-btn accent-action" onClick={() => downloadSnapshotCsv(data)}><Download size={15} aria-hidden="true" /> Download evidence CSV</button>
+            : <a className="ta-btn accent-action no-underline" href={csvUrl(currentQuery())} download><Download size={15} aria-hidden="true" /> Download evidence CSV</a>}
           <small>Observations, trend estimates and method metadata</small>
           {copyStatus && <span role="status">{copyStatus}</span>}
         </div>
