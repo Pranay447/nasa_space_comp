@@ -1,0 +1,20 @@
+{
+  "regionId": "aus-north",
+  "service": "NASA Giovanni v4.40 \u00b7 Time Series, Area-Averaged (ArAvTs)",
+  "dataId": "GPM_3IMERGM_07_precipitation",
+  "units": "mm/hr",
+  "unitsSource": "Giovanni result title for this job (the CSV itself does not state a unit); also the GES DISC OPeNDAP attribute of the precipitation field",
+  "giovanniResultTitle": "Time Series, Area-Averaged of Merged satellite-gauge precipitation estimate - Final Run (recommended for general use) monthly 0.1 deg. [GPM GPM_3IMERGM v07] mm/hr over 2001-01-01 00:00:00Z - 2025-01-01 00:00:00Z, Region 120E, 20S, 146E, 11S",
+  "userBoundingBox": [
+    120,
+    -20,
+    146,
+    -11
+  ],
+  "start": "2001-01-01T00:00:00Z",
+  "end": "2024-12-31T23:59:59Z",
+  "retrievedAt": "2026-11-15",
+  "retrievedVia": "Signed-in browser session on giovanni.gsfc.nasa.gov; file saved byte-for-byte",
+  "sha256": "1f14a6bb326c7771de5d00f2d1b2d3308e715eb45a7514dc49b9d9bac69607cc",
+  "bytes": 10065
+}

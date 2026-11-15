@@ -1,0 +1,39 @@
+{
+  "builtAt": "2026-11-15T05:19:08+00:00",
+  "sources": {
+    "gistemp-zonal": {
+      "file": "NASA_GISTEMP_ZONAL_SNAPSHOT.txt",
+      "url": "https://data.giss.nasa.gov/gistemp/tabledata_v4/ZonAnn.Ts%2BdSST.txt",
+      "sha256": "e489c207215be7210d2f42141681dfd5640f049b704e7ad288b3dcc71114525b",
+      "matchesPinned": true,
+      "inputs": "GHCN-v4 1880-10/2026 + SST: ERSST v5 1880-10/2026",
+      "years": [
+        1880,
+        2025
+      ],
+      "rows": 146
+    },
+    "gistemp-grid": {
+      "file": "data/raw/gistemp1200_GHCNv4_ERSSTv5.nc.gz",
+      "url": "https://data.giss.nasa.gov/pub/gistemp/gistemp1200_GHCNv4_ERSSTv5.nc.gz",
+      "sha256": "f7788db9044d0f0e3f9561ad5d0fd82e59cdfdb82ea8a10244f78f2cb032a3c7",
+      "matchesPinned": true,
+      "history": "Created 2026-11-10 08:55:39 by SBBX_to_nc 2.0 - ILAND=1200, IOCEAN=NCDC/ER5, Base: 1951-1980",
+      "firstMonth": "1880-01",
+      "lastMonth": "2026-10",
+      "months": 1762,
+      "shape": [
+        1762,
+        90,
+        180
+      ],
+      "missingFraction": 0.10845542383094407,
+      "storedUnits": "K (anomaly); numerically equal to degC differences",
+      "scaleFactor": 0.009999999776482582,
+      "fillValue": 32767
+    }
+  },
+  "artifacts": {
+    "data/build/gistemp_cube.npz": "6a70aad04f84e9bace52202a12e4b472323250345ac9384ff80f9e2b84881692"
+  }
+}
