@@ -4,10 +4,9 @@ import { SCENES } from '@/lib/scenes'
 import { useAtlas } from '@/lib/store'
 import type { AnalysisResponse, Dataset } from '@/lib/types'
 
-export function AtlasOverview({ dataset, data, regionLabel }: { dataset: Dataset; data: AnalysisResponse | null; regionLabel?: string }) {
+export function AtlasOverview({ dataset, data, regionLabel, onAnalyze }: { dataset: Dataset; data: AnalysisResponse | null; regionLabel?: string; onAnalyze: () => void }) {
   const year = useAtlas((s) => s.frameYear)
   const setYear = useAtlas((s) => s.setFrameYear)
-  const setMode = useAtlas((s) => s.setMode)
   const { status, offline } = useAtlas((s) => s.analysis)
   const retry = useAtlas((s) => s.retry)
   const summary = data?.dataset ?? dataset
@@ -68,7 +67,7 @@ export function AtlasOverview({ dataset, data, regionLabel }: { dataset: Dataset
         </details>
         <div className="region-stat-footer">
           <a href={summary.source.url} target="_blank" rel="noreferrer">{summary.source.name}</a>
-          <button type="button" className="ta-btn accent-action" onClick={() => setMode('analyze')}>View analysis <ArrowUpRight size={14} aria-hidden="true" /></button>
+          <button type="button" className="ta-btn accent-action" onClick={onAnalyze}>View analysis <ArrowUpRight size={14} aria-hidden="true" /></button>
         </div>
         {offline && <p className="ta-micro">Showing the saved result.</p>}
       </div>}

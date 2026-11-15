@@ -11,6 +11,7 @@ import type { Bounds } from '@/lib/types'
 import { GRID, queryKey } from '@/lib/api'
 import { OBSERVED_SCALE, cssGradient, trendScale } from '@/lib/colors'
 import { signed } from '@/lib/format'
+import { transitionPage } from '@/lib/pageMotion'
 import { currentQuery, stateToParams, useAtlas, useDataset } from '@/lib/store'
 import { useGrid } from '@/lib/useGrid'
 
@@ -58,7 +59,11 @@ export function AtlasPage({ onSources, onSignup }: { onSources: () => void; onSi
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
   useEffect(
-    () => useAtlas.subscribe((st) => window.history.replaceState(null, '', `/atlas?${stateToParams(st).toString()}`)),
+    () => useAtlas.subscribe((st) => {
+      if (window.location.pathname === '/atlas') {
+        window.history.replaceState(window.history.state, '', `/atlas?${stateToParams(st).toString()}`)
+      }
+    }),
     [],
   )
 
@@ -126,16 +131,18 @@ export function AtlasPage({ onSources, onSignup }: { onSources: () => void; onSi
   }, [s.mode])
 
   useEffect(() => {
-    if (exploring && mapOpen) mapPanel.current?.scrollIntoView({ block: 'start' })
+    if (exploring && mapOpen) mapPanel.current?.scrollIntoView({ block: 'start', behavior: 'instant' })
   }, [exploring, mapOpen])
 
   function view(next: 'explore' | 'map' | 'analyze') {
-    if (mapOpen && next === 'explore') window.scrollTo({ top: 0 })
-    setMapOpen(next === 'map')
-    if (next === 'analyze') {
-      setPlaying(false)
-    }
-    s.setMode(next === 'analyze' ? 'analyze' : 'explore')
+    const current = exploring ? (mapOpen ? 'map' : 'explore') : 'analyze'
+    if (current === next) return
+    transitionPage(() => {
+      if (mapOpen && next === 'explore') window.scrollTo({ top: 0, behavior: 'instant' })
+      setMapOpen(next === 'map')
+      if (next === 'analyze') setPlaying(false)
+      s.setMode(next === 'analyze' ? 'analyze' : 'explore')
+    })
   }
 
   const share = async () => {
@@ -184,7 +191,7 @@ export function AtlasPage({ onSources, onSignup }: { onSources: () => void; onSi
         </p>
       )}
 
-      <main className="min-w-0">
+      <main className="min-w-0" data-page-motion>
         {!exploring && dataset && (
           <>
             {data && <AnalyzePanel key={data.queryKey} dataset={dataset} data={data} charts={
@@ -283,7 +290,7 @@ export function AtlasPage({ onSources, onSignup }: { onSources: () => void; onSi
         </div>}
 
           </section>
-          {dataset && <AtlasOverview dataset={dataset} data={data} regionLabel={regions.find((r) => r.slot === 'a')?.label} />}
+          {dataset && <AtlasOverview dataset={dataset} data={data} regionLabel={regions.find((r) => r.slot === 'a')?.label} onAnalyze={() => view('analyze')} />}
           </div>
         )}
       </main>

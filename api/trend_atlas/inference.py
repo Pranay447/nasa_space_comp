@@ -1,6 +1,6 @@
 """Trend inference shared by every dataset.
 
-Contract (CLAUDE_BUILD_PLAN.md, "Analysis contract"):
+Contract (BUILD_PLAN.md, "Analysis contract"):
 - OLS of annual values on centred calendar years.
 - HAC covariance, Bartlett kernel, maxlags=2 (primary), small-sample
   correction, t reference distribution. Sensitivity at lags 1, 2, 3.

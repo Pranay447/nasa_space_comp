@@ -4,7 +4,7 @@
 
 @custom-variant dark (&:is(.dark *));
 
-/* Semantic tokens (CLAUDE_BUILD_PLAN.md "Visual system"). Dark workstation is the default. */
+/* Semantic tokens (BUILD_PLAN.md "Visual system"). Dark workstation is the default. */
 :root {
   --mast-height: 3.75rem;
   --ta-canvas: #f1f4f7;
@@ -454,14 +454,22 @@ html:not(.dark) .atlas-masthead :is(a,button):hover { color: var(--ta-accent); b
   .dashboard-map-tools .ta-btn, .dashboard-map-footer .ta-btn { min-height: 44px; }
 }
 @keyframes analysis-reveal { from { opacity: 0; transform: translateY(5px); } }
-@keyframes route-reveal { from { opacity: .48; transform: translateY(7px); } }
-@keyframes route-fade { from { opacity: .68; } }
+@keyframes page-away { to { opacity: 0; translate: 0 -12px; } }
+@keyframes page-arrive { from { opacity: 0; translate: 0 20px; } }
 @media (prefers-reduced-motion: no-preference) {
   html:has(.atlas-weather-shell) { scroll-behavior: smooth; }
   .analysis-hero-content, .analysis-disclosure[open] > .analysis-disclosure-body { animation: analysis-reveal .26s ease-out both; }
-  .route-enter { animation: route-fade .28s ease-out; }
-  .atlas-dashboard, .analysis-page { animation: route-reveal .28s cubic-bezier(.22,.65,.3,1); }
   .dashboard-map-stage { transition: height .34s cubic-bezier(.22,.65,.3,1); }
+  .editorial-mast { view-transition-name: masthead; }
+  .dashboard-map-stage { view-transition-name: atlas-globe; }
+  :root:active-view-transition .dashboard-map-stage { transition: none; }
+  ::view-transition-group(root),
+  ::view-transition-group(masthead),
+  ::view-transition-group(atlas-globe) { animation-duration: .38s; }
+  ::view-transition-group(masthead) { z-index: 2; }
+  ::view-transition-group(atlas-globe) { z-index: 1; }
+  ::view-transition-old(root) { animation: page-away .27s ease-in both; mix-blend-mode: normal; }
+  ::view-transition-new(root) { animation: page-arrive .38s cubic-bezier(.22,.7,.25,1) both; mix-blend-mode: normal; }
 }
 @media (max-width: 600px) {
   .analysis-hero::before { background: linear-gradient(90deg, #091623e6, #09162398), linear-gradient(0deg, #0712208c, transparent 30%); }
